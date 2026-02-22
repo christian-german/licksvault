@@ -1,0 +1,57 @@
+/* TODO : Avoid ::ng-deep */
+
+
+:host ::ng-deep .at-cursor {
+    position: absolute;
+    background: rgba(255, 255, 0, 0.3) !important;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    pointer-events: none;
+}
+
+:host ::ng-deep .at-selection {
+    position: absolute;
+    background: rgba(64, 64, 255, 0.1) !important;
+    pointer-events: none;
+}
+
+:host ::ng-deep .at-cursor-bar {
+    position: absolute;
+    background: rgba(255, 255, 0, 0.3) !important;
+    z-index: 5;
+    pointer-events: none;
+}
+
+:host ::ng-deep .at-cursor-beat {
+    position: absolute;
+    background: rgba(0, 255, 0, 0.3) !important;
+    z-index: 10;
+    pointer-events: none;
+}
+
+:host ::ng-deep .at-main {
+    position: relative;
+}
+
+:host ::ng-deep .at-viewport {
+    position: relative;
+}
+
+:host ::ng-deep .at-surface {
+    position: relative;
+}
+
+/* Ensure the cursor is visible over the tab */
+:host ::ng-deep .at-cursor,
+:host ::ng-deep .at-cursor-bar,
+:host ::ng-deep .at-cursor-beat {
+    display: block !important;
+}
+
+.font-monospace {
+    font-family: monospace;
+}
+
+.whitespace-pre-wrap {
+    white-space: pre-wrap;
+}

@@ -1,0 +1,16 @@
+<div class="layout-wrapper">
+  <div class="layout-topbar p-2 flex justify-content-between align-items-center shadow-2 mb-2 bg-primary text-primary-contrast">
+    <div class="flex align-items-center gap-2 cursor-pointer" routerLink="/">
+      <i class="pi pi-music text-2xl"></i>
+      <span class="text-xl font-bold">Guitar Lick Library</span>
+    </div>
+    <div class="flex align-items-center gap-2">
+      <p-button icon="pi pi-plus" [rounded]="true" [text]="true" pTooltip="New Lick" routerLink="/licks/new" severity="secondary"></p-button>
+      <p-button [icon]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" (onClick)="toggleTheme()" [rounded]="true" [text]="true" severity="secondary"></p-button>
+    </div>
+  </div>
+
+  <div class="layout-content p-2">
+    <router-outlet></router-outlet>
+  </div>
+</div>

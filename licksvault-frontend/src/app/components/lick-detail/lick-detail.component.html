@@ -1,0 +1,151 @@
+@if (lick) {
+  <div class="card">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="px-4 pt-4">
+          <p-inplace #nameInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(nameInplace)">
+            <ng-template pTemplate="display">
+              <h1 class="m-0 cursor-pointer hover:text-primary">{{lick.name}}</h1>
+            </ng-template>
+            <ng-template pTemplate="content">
+              <input type="text" pInputText [(ngModel)]="lick.name" class="w-full text-2xl font-bold" (blur)="nameInplace.deactivate()" (keyup.enter)="nameInplace.deactivate()" />
+            </ng-template>
+          </p-inplace>
+          <p-inplace #genreInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(genreInplace)">
+            <ng-template pTemplate="display">
+              <span class="text-color-secondary cursor-pointer hover:text-primary">{{lick.genre}}</span>
+            </ng-template>
+            <ng-template pTemplate="content">
+              <p-select [options]="genreOptions" [(ngModel)]="lick.genre" placeholder="Select a Genre" (onChange)="genreInplace.deactivate()" (onBlur)="genreInplace.deactivate()" (onHide)="genreInplace.deactivate()"></p-select>
+            </ng-template>
+          </p-inplace>
+        </div>
+      </ng-template>
+      <div class="grid">
+        <div class="col-12 md:col-6">
+          <div class="grid align-items-center">
+            <div class="col-4 font-bold py-1">BPM:</div>
+            <div class="col-8 py-1">
+              <p-inplace #bpmInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(bpmInplace)">
+                <ng-template pTemplate="display">
+                  <span class="cursor-pointer hover:text-primary">{{lick.bpm}}</span>
+                </ng-template>
+                <ng-template pTemplate="content">
+                  <p-inputNumber [(ngModel)]="lick.bpm" [showButtons]="true" [min]="20" [max]="300" (onBlur)="bpmInplace.deactivate()" (onKeyDown)="$event.key === 'Enter' && bpmInplace.deactivate()"></p-inputNumber>
+                </ng-template>
+              </p-inplace>
+            </div>
+          </div>
+          <div class="grid align-items-center">
+            <div class="col-4 font-bold py-1">Tonic:</div>
+            <div class="col-8 py-1 flex gap-1">
+              <p-inplace #keyInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(keyInplace)">
+                <ng-template pTemplate="display">
+                  <span class="cursor-pointer hover:text-primary">{{getKeyLabel(lick.rootNote)}}</span>
+                </ng-template>
+                <ng-template pTemplate="content">
+                  <p-select [options]="keyOptions" [(ngModel)]="lick.rootNote" placeholder="Select a Tonic" (onChange)="keyInplace.deactivate()" (onBlur)="keyInplace.deactivate()" (onHide)="keyInplace.deactivate()"></p-select>
+                </ng-template>
+              </p-inplace>
+              <p-inplace #modeInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(modeInplace)">
+                <ng-template pTemplate="display">
+                  <span class="cursor-pointer hover:text-primary">{{getModeLabel(lick.mode)}}</span>
+                </ng-template>
+                <ng-template pTemplate="content">
+                  <p-select [options]="modeOptions" [(ngModel)]="lick.mode" placeholder="Select a Mode" (onChange)="modeInplace.deactivate()" (onBlur)="modeInplace.deactivate()" (onHide)="modeInplace.deactivate()"></p-select>
+                </ng-template>
+              </p-inplace>
+            </div>
+          </div>
+          <div class="grid align-items-center">
+            <div class="col-4 font-bold py-1">Length:</div>
+            <div class="col-8 py-1">
+              <p-inplace #lengthInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(lengthInplace)">
+                <ng-template pTemplate="display">
+                  <span class="cursor-pointer hover:text-primary">{{lick.lengthBars}} bars</span>
+                </ng-template>
+                <ng-template pTemplate="content">
+                  <p-inputNumber [(ngModel)]="lick.lengthBars" [showButtons]="true" [min]="1" [max]="64" (onBlur)="lengthInplace.deactivate()" (onKeyDown)="$event.key === 'Enter' && lengthInplace.deactivate()"></p-inputNumber>
+                </ng-template>
+              </p-inplace>
+            </div>
+          </div>
+          <div class="grid align-items-center">
+            <div class="col-4 font-bold py-1">Description:</div>
+            <div class="col-8 py-1">
+              <p-inplace #descInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(descInplace)">
+                <ng-template pTemplate="display">
+                  <span class="cursor-pointer hover:text-primary whitespace-pre-wrap">{{lick.description || 'No description provided.'}}</span>
+                </ng-template>
+                <ng-template pTemplate="content">
+                  <textarea pInputTextarea [(ngModel)]="lick.description" rows="3" class="w-full" (blur)="descInplace.deactivate()"></textarea>
+                </ng-template>
+              </p-inplace>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <hr class="my-2 surface-border" />
+        </div>
+
+        <div class="col-12 lg:col-6 mt-2">
+          <app-alphatab [lick]="lick"></app-alphatab>
+        </div>
+
+        <div class="col-12 lg:col-6 mt-2">
+          <div class="grid">
+            @if (getExistingVideoUrl()) {
+              <div class="col-12">
+                <video #videoPlayer [src]="getExistingVideoUrl()" controls class="w-full border-round shadow-2" style="max-height: 500px; background: black; object-fit: contain;"></video>
+              </div>
+            } @else {
+              <div class="col-12">
+                <div class="flex flex-column gap-3">
+                  @if (recording || videoUrl) {
+                    <div class="surface-100 border-round p-3 flex flex-column align-items-center justify-content-center relative overflow-hidden" style="min-height: 400px; max-height: 500px; background: black;">
+                      @if (recording) {
+                        <video #videoPreview autoplay muted class="w-full h-full" style="object-fit: contain;"></video>
+                        <div class="absolute top-0 right-0 m-2 flex align-items-center gap-2">
+                          <span class="p-tag p-tag-danger flex align-items-center gap-1">
+                            <i class="pi pi-circle-fill text-xs"></i> Recording
+                          </span>
+                        </div>
+                      } @else if (videoUrl) {
+                        <video [src]="videoUrl" controls class="w-full h-full" style="object-fit: contain;"></video>
+                      }
+                    </div>
+                  }
+
+                  <div class="flex flex-wrap gap-2 justify-content-center">
+                    @if (!recording && !videoUrl) {
+                      <p-button label="Record a video" icon="pi pi-video" (onClick)="startRecording()" severity="primary"></p-button>
+                    } @else if (recording) {
+                      <p-button label="Stop Recording" icon="pi pi-stop" (onClick)="stopRecording()" severity="danger"></p-button>
+                    } @else if (videoUrl) {
+                      <p-button label="Try Again" icon="pi pi-refresh" (onClick)="startRecording()" severity="secondary"></p-button>
+                      <p-button label="Clear" icon="pi pi-trash" (onClick)="clearRecording()" severity="warn"></p-button>
+                      <p-button label="Upload Video" icon="pi pi-upload" (onClick)="saveVideo()" severity="success" [loading]="isSavingVideo"></p-button>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-between align-items-center">
+          <p-button label="Back to list" icon="pi pi-arrow-left" routerLink="/" [text]="true"></p-button>
+          <div class="flex gap-2">
+            <p-button label="Delete" icon="pi pi-trash" (onClick)="deleteLick()" severity="danger"></p-button>
+          </div>
+        </div>
+      </ng-template>
+    </p-card>
+  </div>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+}

@@ -1,0 +1,32 @@
+.sticky-sidebar {
+    position: sticky;
+    top: 1rem;
+    height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+.lick-card :host ::ng-deep .p-card-body {
+    padding: 0;
+}
+
+.lick-card :host ::ng-deep .p-card-content {
+    padding: 0;
+}
+
+/* Hide scrollbar for sidebar but allow scrolling */
+.sticky-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sticky-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sticky-sidebar::-webkit-scrollbar-thumb {
+    background: var(--surface-border);
+    border-radius: 4px;
+}
+
+.sticky-sidebar:hover::-webkit-scrollbar-thumb {
+    background: var(--text-color-secondary);
+}

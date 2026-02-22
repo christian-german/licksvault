@@ -1,0 +1,49 @@
+<div class="card p-4">
+  <p-card header="Create New Lick">
+    <div class="p-fluid grid">
+      <div class="field col-12">
+        <label for="name" class="font-bold">Name</label>
+        <input id="name" type="text" pInputText [(ngModel)]="lick.name" placeholder="Enter lick name" />
+      </div>
+
+      <div class="field col-12 md:col-6">
+        <label for="genre" class="font-bold">Genre</label>
+        <p-select id="genre" [options]="genreOptions" [(ngModel)]="lick.genre" placeholder="Select a Genre"></p-select>
+      </div>
+
+      <div class="field col-12 md:col-6">
+        <label for="bpm" class="font-bold">BPM</label>
+        <p-inputNumber id="bpm" [(ngModel)]="lick.bpm" [showButtons]="true" [min]="20" [max]="300"></p-inputNumber>
+      </div>
+
+      <div class="field col-12 md:col-6">
+        <label for="rootNote" class="font-bold">Tonic</label>
+        <p-select id="rootNote" [options]="keyOptions" [(ngModel)]="lick.rootNote" placeholder="Select a Tonic"></p-select>
+      </div>
+
+      <div class="field col-12 md:col-6">
+        <label for="mode" class="font-bold">Mode</label>
+        <p-select id="mode" [options]="modeOptions" [(ngModel)]="lick.mode" placeholder="Select a Mode"></p-select>
+      </div>
+
+      <div class="field col-12 md:col-6">
+        <label for="lengthBars" class="font-bold">Length (Bars)</label>
+        <p-inputNumber id="lengthBars" [(ngModel)]="lick.lengthBars" [showButtons]="true" [min]="1" [max]="64"></p-inputNumber>
+      </div>
+
+      <div class="field col-12">
+        <label for="description" class="font-bold">Description</label>
+        <textarea id="description" pInputTextarea [(ngModel)]="lick.description" rows="3" placeholder="Enter description"></textarea>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <div class="flex justify-content-end gap-2">
+        <p-button label="Cancel" icon="pi pi-times" (onClick)="cancel()" severity="secondary"></p-button>
+        <p-button label="Save Lick" icon="pi pi-check" (onClick)="saveLick()" [disabled]="!lick.name"></p-button>
+      </div>
+    </ng-template>
+  </p-card>
+</div>
+
+<p-toast></p-toast>

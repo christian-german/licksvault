@@ -1,0 +1,30 @@
+/* You can add global styles to this file, and also import other style files */
+@import "primeflex/primeflex.css";
+@import "primeicons/primeicons.css";
+
+html.my-app-dark body {
+    background-color: #121212;
+    color: #E5E7EB;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.card {
+    background: var(--surface-card);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

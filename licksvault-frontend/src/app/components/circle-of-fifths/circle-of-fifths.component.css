@@ -1,0 +1,50 @@
+.circle-container {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.circle-svg {
+  width: 100%;
+  height: auto;
+  cursor: pointer;
+}
+
+.circle-bg {
+  fill: #1E1E1E; /* surface-800 */
+  stroke: #393939; /* surface-700 */
+  stroke-width: 1;
+}
+
+.slice {
+  fill: #1E1E1E; /* surface-800 to ensure it's not transparent/black */
+  stroke: #393939;
+  stroke-width: 0.5;
+  transition: fill 0.2s, opacity 0.2s;
+  pointer-events: all;
+}
+
+.slice:hover {
+  fill: #F59E0B; /* primary-500/amber-500 */
+  opacity: 0.2;
+}
+
+.slice.selected {
+  fill: #F59E0B;
+  opacity: 1;
+}
+
+.slice-label {
+  fill: #E5E7EB; /* Text color */
+  font-size: 16px;
+  font-weight: bold;
+  pointer-events: all;
+  cursor: pointer;
+  user-select: none;
+}
+
+.circle-center {
+  fill: #1E1E1E;
+  stroke: #393939;
+  stroke-width: 1;
+}

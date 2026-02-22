@@ -1,0 +1,35 @@
+<div class="circle-container flex justify-content-center">
+  <svg viewBox="0 0 200 200" class="circle-svg">
+    <!-- Background circle -->
+    <circle cx="100" cy="100" r="95" class="circle-bg" />
+
+    <!-- Slices -->
+    @for (slice of keys; track slice.key) {
+      <path
+        [attr.d]="'M 100 100 L 100 10 A 90 90 0 0 1 145 24.1 Z'"
+        [class.selected]="selectedKey() === slice.key"
+        class="slice"
+        (click)="selectKey(slice.key)"
+        [attr.transform]="getTransform(slice.angle - 15)"
+      />
+    }
+
+    <!-- Labels -->
+    @for (slice of keys; track slice.key) {
+      <text
+        [attr.x]="0"
+        [attr.y]="0"
+        [attr.transform]="getTextTransform(slice.angle)"
+        class="slice-label"
+        dominant-baseline="middle"
+        text-anchor="middle"
+        (click)="selectKey(slice.key)"
+      >
+        {{slice.label}}
+      </text>
+    }
+
+    <!-- Center hole for donut look (optional, but looks better) -->
+    <circle cx="100" cy="100" r="35" class="circle-center" />
+  </svg>
+</div>
