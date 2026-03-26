@@ -1,0 +1,42 @@
+name: Build & Push Docker Images
+
+on:
+  push:
+    branches: [master]
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: ${{ github.repository_owner }}
+  REPO: ${{ github.event.repository.name }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        include:
+          - context: ./licksvault-frontend
+            image: licksvault-frontend
+          - context: ./licksvault-backend
+            image: licksvault-backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.REPO }}/${{ matrix.image }}:latest
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ env.REPO }}/${{ matrix.image }}:${{ github.sha }}
