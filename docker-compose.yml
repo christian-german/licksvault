@@ -1,5 +1,5 @@
 services:
-  db:
+  licksvault-db:
     image: postgres:18.1-alpine
     container_name: licksvault-db
     environment:
@@ -11,32 +11,29 @@ services:
     ports:
       - "5432:5432"
 
-  backend:
+  licksvault-backend:
     build:
       context: licksvault-backend
     container_name: licksvault-backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/licksvault
+      SPRING_DATASOURCE_URL: jdbc:postgresql://licksvault-db:5432/licksvault
       SPRING_DATASOURCE_USERNAME: licksvault
       SPRING_DATASOURCE_PASSWORD: licksvault
-      SPRING_FLYWAY_URL: jdbc:postgresql://db:5432/licksvault
-      SPRING_FLYWAY_USER: chris
-      SPRING_FLYWAY_PASSWORD: password
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      - licksvault-db
 
-  frontend:
+  licksvault-frontend:
     build:
       context: licksvault-frontend
     container_name: licksvault-frontend
     ports:
-      - "4200:4200"
+      - "80:80"
     depends_on:
-      - backend
+      - licksvault-backend
 
-  minio:
+  licksvault-minio:
     image: minio/minio:RELEASE.2024-03-07T00-43-48Z
     container_name: licksvault-minio
     environment:
