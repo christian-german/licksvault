@@ -1,20 +1,30 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { LickService } from './lick.service';
+import { ConfigService } from './config.service';
 import { Lick, MusicalKey, Mode, Genre } from '../models/lick.model';
-import { environment } from '../../environments/environment';
+import { of } from 'rxjs';
 
 describe('LickService', () => {
   let service: LickService;
   let httpMock: HttpTestingController;
+  let configServiceSpy: jasmine.SpyObj<ConfigService>;
 
   beforeEach(() => {
+    const spy = jasmine.createSpyObj('ConfigService', ['loadConfig'], {
+      apiUrl: 'http://localhost:8080'
+    });
+
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [LickService]
+      providers: [
+        LickService,
+        { provide: ConfigService, useValue: spy }
+      ]
     });
     service = TestBed.inject(LickService);
     httpMock = TestBed.inject(HttpTestingController);
+    configServiceSpy = TestBed.inject(ConfigService) as jasmine.SpyObj<ConfigService>;
   });
 
   afterEach(() => {
@@ -38,7 +48,7 @@ describe('LickService', () => {
       expect(response).toEqual(mockResponse);
     });
 
-    const req = httpMock.expectOne(req => req.url === `${environment.apiUrl}/licks`);
+    const req = httpMock.expectOne(req => req.url === `http://localhost:8080/licks`);
     expect(req.request.method).toBe('GET');
     req.flush(mockResponse);
   });
@@ -57,7 +67,7 @@ describe('LickService', () => {
       expect(lick).toEqual(mockLick);
     });
 
-    const req = httpMock.expectOne(`${environment.apiUrl}/licks`);
+    const req = httpMock.expectOne(`http://localhost:8080/licks`);
     expect(req.request.method).toBe('POST');
     req.flush(mockLick);
   });

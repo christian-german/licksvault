@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
@@ -7,6 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primeuix/themes';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfigService } from './services/config.service';
 
 const MyPreset = definePreset(Aura, {
     semantic: {
@@ -71,6 +72,12 @@ export const appConfig: ApplicationConfig = {
         }
     }),
     MessageService,
-    ConfirmationService
+    ConfirmationService,
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (configService: ConfigService) => () => configService.loadConfig(),
+      deps: [ConfigService],
+      multi: true
+    }
   ]
 };

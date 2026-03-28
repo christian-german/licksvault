@@ -8,6 +8,9 @@ RUN npm run build
 
 # Run stage
 FROM nginx:alpine
-COPY --from=build /app/dist/licksvault-frontend /usr/share/nginx/html
+WORKDIR /usr/share/nginx/html
+COPY --from=build /app/dist/licksvault-frontend .
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+
+# Use a custom entrypoint to replace environment variables in config.template.json
+CMD ["/bin/sh", "-c", "envsubst < assets/config.template.json > assets/config.json && exec nginx -g 'daemon off;'"]

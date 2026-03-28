@@ -4,13 +4,17 @@ import { Observable } from 'rxjs';
 import { Lick, PageResponse } from '../models/lick.model';
 import { environment } from '../../environments/environment';
 
+import { ConfigService } from './config.service';
+
 @Injectable({
   providedIn: 'root'
 })
 export class LickService {
-  private apiUrl = `${environment.apiUrl}/licks`;
+  private get apiUrl() {
+    return `${this.configService.apiUrl}/licks`;
+  }
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private configService: ConfigService) {}
 
   getLicks(filters: any = {}, page: number = 0, size: number = 20, sortBy: string = 'createdAt', sortDir: string = 'desc'): Observable<PageResponse<Lick>> {
     let params = new HttpParams()
@@ -63,7 +67,7 @@ export class LickService {
       filename: `${lick.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.gp`,
       content: lick.gpFile,
       lick_id: lick.id,
-      api_url: environment.apiUrl
+      api_url: this.configService.apiUrl
     }, { responseType: 'text' });
   }
 

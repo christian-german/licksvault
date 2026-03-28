@@ -20,10 +20,9 @@ import {SelectModule} from 'primeng/select';
 import {TextareaModule} from 'primeng/textarea';
 import {ConfirmationService, MessageService} from 'primeng/api';
 import {LickService} from '../../services/lick.service';
+import {ConfigService} from '../../services/config.service';
 import {Genre, Lick, Mode, MusicalKeyLabels} from '../../models/lick.model';
 import {AlphaTabComponent} from '../alphatab/alphatab.component';
-
-import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-lick-detail',
@@ -73,6 +72,7 @@ export class LickDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private lickService: LickService,
+    private configService: ConfigService,
     private route: ActivatedRoute,
     private router: Router,
     private messageService: MessageService,
@@ -88,7 +88,7 @@ export class LickDetailComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
 
-    this.eventSource = new EventSource(`${environment.apiUrl}/licks/events`);
+    this.eventSource = new EventSource(`${this.configService.apiUrl}/licks/events`);
     this.eventSource.addEventListener('LICK_UPDATED', (event: any) => {
       const data = JSON.parse(event.data);
       if (data.lickId === +id) {
