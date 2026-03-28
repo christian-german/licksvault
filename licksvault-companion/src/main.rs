@@ -123,11 +123,14 @@ fn start_local_server() {
             let url = request.url().to_string();
             let method = request.method().clone();
 
-            match (method, url.as_str()) {
+            let origin = request.headers().iter()
+                .find(|h| h.field.as_str() == "Origin")
+                .map(|h| h.value.as_str().to_string())
+                .unwrap_or_else(|| "*".to_string());
+
+            let mut response = match (method, url.as_str()) {
                 (Method::Get, "/ping") => {
-                    let response = Response::from_string("pong")
-                        .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
-                    let _ = request.respond(response);
+                    Response::from_string("pong")
                 }
 
                 (Method::Get, "/open") => {
@@ -135,16 +138,15 @@ fn start_local_server() {
 
                     open_guitar_pro(None);
 
-                    let response = Response::from_string("opened")
-                        .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
-                    let _ = request.respond(response);
+                    Response::from_string("opened")
                 }
 
                 (Method::Post, "/open-file") => {
                     let mut content = String::new();
-                    request.as_reader().read_to_string(&mut content).unwrap();
-
-                    if let Ok(open_req) = serde_json::from_str::<OpenFileRequest>(&content) {
+                    if let Err(e) = request.as_reader().read_to_string(&mut content) {
+                        eprintln!("Failed to read request body: {:?}", e);
+                        Response::from_string("failed to read request body").with_status_code(400)
+                    } else if let Ok(open_req) = serde_json::from_str::<OpenFileRequest>(&content) {
                         let filename = open_req.filename.clone().unwrap_or_else(|| {
                             if let Some(id) = open_req.lick_id {
                                 format!("lick_{}.gp", id)
@@ -168,44 +170,46 @@ fn start_local_server() {
                         let windows_temp = PathBuf::from("/mnt/c/Users/chris/AppData/Local/Temp");
                         let temp_file_path = windows_temp.join(&filename);
 
-                        let mut file = std::fs::File::create(&temp_file_path).expect("failed to create temp file");
-                        file.write_all(&file_bytes).expect("failed to write to temp file");
+                        match std::fs::File::create(&temp_file_path) {
+                            Ok(mut file) => {
+                                if let Err(e) = file.write_all(&file_bytes) {
+                                    eprintln!("Failed to write to temp file: {:?}", e);
+                                }
+                                println!("File saved to: {:?}", temp_file_path);
 
-                        println!("File saved to: {:?}", temp_file_path);
+                                // Start watching for changes if lick_id and api_url are provided
+                                if let (Some(lick_id), Some(api_url)) = (open_req.lick_id, open_req.api_url) {
+                                    watch_and_upload(temp_file_path.clone(), lick_id, api_url);
+                                }
 
-                        // Start watching for changes if lick_id and api_url are provided
-                        if let (Some(lick_id), Some(api_url)) = (open_req.lick_id, open_req.api_url) {
-                            watch_and_upload(temp_file_path.clone(), lick_id, api_url);
+                                // Open with Guitar Pro
+                                open_guitar_pro(Some(temp_file_path));
+
+                                Response::from_string("opened")
+                            }
+                            Err(e) => {
+                                eprintln!("Failed to create temp file: {:?}", e);
+                                Response::from_string("failed to create temp file").with_status_code(500)
+                            }
                         }
-
-                        // Open with Guitar Pro
-                        open_guitar_pro(Some(temp_file_path));
-
-                        let response = Response::from_string("opened")
-                            .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
-                        let _ = request.respond(response);
                     } else {
-                        let response = Response::from_string("invalid json").with_status_code(400)
-                            .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
-                        let _ = request.respond(response);
+                        Response::from_string("invalid json").with_status_code(400)
                     }
                 }
 
                 (Method::Options, _) => {
-                    let response = Response::from_string("")
-                        .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap())
+                    Response::from_string("")
                         .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Methods"[..], &b"GET, POST, OPTIONS"[..]).unwrap())
-                        .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Headers"[..], &b"Content-Type"[..]).unwrap());
-                    let _ = request.respond(response);
+                        .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Headers"[..], &b"Content-Type"[..]).unwrap())
                 }
 
                 _ => {
-                    let response =
-                        Response::from_string("not found").with_status_code(404)
-                        .with_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], &b"*"[..]).unwrap());
-                    let _ = request.respond(response);
+                    Response::from_string("not found").with_status_code(404)
                 }
-            }
+            };
+
+            response.add_header(tiny_http::Header::from_bytes(&b"Access-Control-Allow-Origin"[..], origin.as_bytes()).unwrap());
+            let _ = request.respond(response);
         }
     });
 }
