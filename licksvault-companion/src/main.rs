@@ -167,7 +167,7 @@ fn start_local_server() {
                         };
 
                         // Create temp file
-                        let windows_temp = PathBuf::from("/mnt/c/Users/chris/AppData/Local/Temp");
+                        let windows_temp = std::env::temp_dir();
                         let temp_file_path = windows_temp.join(&filename);
 
                         match std::fs::File::create(&temp_file_path) {
