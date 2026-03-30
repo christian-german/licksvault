@@ -23,6 +23,7 @@ import {LickService} from '../../services/lick.service';
 import {ConfigService} from '../../services/config.service';
 import {Genre, Lick, Mode, MusicalKeyLabels} from '../../models/lick.model';
 import {AlphaTabComponent} from '../alphatab/alphatab.component';
+import {CircleOfFifthsComponent} from '../circle-of-fifths/circle-of-fifths.component';
 
 @Component({
   selector: 'app-lick-detail',
@@ -40,7 +41,8 @@ import {AlphaTabComponent} from '../alphatab/alphatab.component';
     InputNumberModule,
     SelectModule,
     TextareaModule,
-    AlphaTabComponent
+    AlphaTabComponent,
+    CircleOfFifthsComponent
   ],
   templateUrl: './lick-detail.component.html',
   styleUrl: './lick-detail.component.css'

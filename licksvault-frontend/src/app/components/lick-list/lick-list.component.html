@@ -7,59 +7,53 @@
                 <input pInputText type="text" [(ngModel)]="filters.name" placeholder="Search by name" class="w-full" (keyup.enter)="onSearch()"/>
             </p-icon-field>
 
-            <p-accordion [multiple]="true" [value]="['genre', 'harmony', 'tempo']">
-                <p-accordion-panel value="genre">
-                    <p-accordion-header>Genre</p-accordion-header>
-                    <p-accordion-content>
-                        <div class="flex flex-wrap gap-2">
-                            @for (opt of genreOptions; track opt.value) {
-                                <p-button [label]="opt.label"
-                                          [severity]="filters.genre === opt.value ? 'primary' : 'secondary'"
-                                          [outlined]="filters.genre !== opt.value"
-                                          size="small"
-                                          (onClick)="filters.genre = opt.value; onSearch()"></p-button>
-                            }
-                        </div>
-                    </p-accordion-content>
-                </p-accordion-panel>
+            <div class="flex flex-column gap-4">
+                <div class="filter-section">
+                    <label class="text-sm font-bold block mb-2">Genre</label>
+                    <div class="flex flex-wrap gap-2">
+                        @for (opt of genreOptions; track opt.value) {
+                            <p-button [label]="opt.label"
+                                      [severity]="filters.genre === opt.value ? 'primary' : 'secondary'"
+                                      [outlined]="filters.genre !== opt.value"
+                                      size="small"
+                                      (onClick)="filters.genre = opt.value; onSearch()"></p-button>
+                        }
+                    </div>
+                </div>
 
-                <p-accordion-panel value="harmony">
-                    <p-accordion-header>Harmony</p-accordion-header>
-                    <p-accordion-content>
-                        <div class="flex flex-column gap-3">
-                            <div class="flex flex-column gap-1">
-                                <label class="text-sm font-bold">Tonic</label>
-                                <app-circle-of-fifths [selectedKey]="filters.key" (keyChange)="filters.key = $event; onSearch()"></app-circle-of-fifths>
-                            </div>
-                            <div class="flex flex-column gap-1">
-                                <label class="text-sm font-bold">Mode</label>
-                                <div class="flex flex-wrap gap-2">
-                                    @for (opt of modeOptions; track opt.value) {
-                                        <p-button [label]="opt.label"
-                                                  [severity]="filters.mode === opt.value ? 'primary' : 'secondary'"
-                                                  [outlined]="filters.mode !== opt.value"
-                                                  size="small"
-                                                  (onClick)="filters.mode = opt.value; onSearch()"></p-button>
-                                    }
-                                </div>
+                <div class="filter-section">
+                    <label class="text-sm font-bold block mb-2">Harmony</label>
+                    <div class="flex flex-column gap-3">
+                        <div class="flex align-items-center justify-content-between">
+                            <label class="text-sm">Tonic</label>
+                            <app-circle-of-fifths [selectedKey]="filters.key" (keyChange)="filters.key = $event; onSearch()"></app-circle-of-fifths>
+                        </div>
+                        <div class="flex flex-column gap-1">
+                            <label class="text-xs font-semibold text-color-secondary">Mode</label>
+                            <div class="flex flex-wrap gap-2">
+                                @for (opt of modeOptions; track opt.value) {
+                                    <p-button [label]="opt.label"
+                                              [severity]="filters.mode === opt.value ? 'primary' : 'secondary'"
+                                              [outlined]="filters.mode !== opt.value"
+                                              size="small"
+                                              (onClick)="filters.mode = opt.value; onSearch()"></p-button>
+                                }
                             </div>
                         </div>
-                    </p-accordion-content>
-                </p-accordion-panel>
+                    </div>
+                </div>
 
-                <p-accordion-panel value="tempo">
-                    <p-accordion-header>Tempo</p-accordion-header>
-                    <p-accordion-content>
-                        <div class="flex flex-column gap-3">
-                            <div class="flex justify-content-between text-sm">
-                                <span>{{filters.bpmMin}}</span>
-                                <span>{{filters.bpmMax}}</span>
-                            </div>
-                            <p-slider [ngModel]="[filters.bpmMin, filters.bpmMax]" [min]="40" [max]="240" [step]="5" [range]="true" (onSlideEnd)="onSearch()" (ngModelChange)="filters.bpmMin = $event[0]; filters.bpmMax = $event[1]"></p-slider>
+                <div class="filter-section">
+                    <label class="text-sm font-bold block mb-2">Tempo</label>
+                    <div class="flex flex-column gap-3">
+                        <div class="flex justify-content-between text-xs text-color-secondary">
+                            <span>{{filters.bpmMin}} BPM</span>
+                            <span>{{filters.bpmMax}} BPM</span>
                         </div>
-                    </p-accordion-content>
-                </p-accordion-panel>
-            </p-accordion>
+                        <p-slider [ngModel]="[filters.bpmMin, filters.bpmMax]" [min]="40" [max]="240" [step]="5" [range]="true" (onSlideEnd)="onSearch()" (ngModelChange)="filters.bpmMin = $event[0]; filters.bpmMax = $event[1]"></p-slider>
+                    </div>
+                </div>
+            </div>
 
             <p-button label="Reset Filters" icon="pi pi-refresh" (onClick)="resetFilters()" severity="secondary" [outlined]="true" class="w-full"></p-button>
         </div>
@@ -149,3 +143,9 @@
 
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
+
+<p-dialog [(visible)]="showCreateDialog" (onHide)="onCancelCreate()" [modal]="true" header="Create New Lick" [style]="{width: '95vw', maxWidth: '850px'}" [breakpoints]="{'960px': '95vw', '640px': '100vw'}" [draggable]="false" [resizable]="false" [contentStyle]="{'overflow-x': 'hidden'}">
+    @if (showCreateDialog) {
+        <app-lick-create (saved)="onLickCreated($event)" (cancelled)="onCancelCreate()"></app-lick-create>
+    }
+</p-dialog>

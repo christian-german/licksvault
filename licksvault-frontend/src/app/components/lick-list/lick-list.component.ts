@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener, inject, effect } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,15 +13,17 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { AccordionModule } from 'primeng/accordion';
 import { TagModule } from 'primeng/tag';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { CircleOfFifthsComponent } from '../circle-of-fifths/circle-of-fifths.component';
+import { DialogModule } from 'primeng/dialog';
+import { LickCreateComponent } from '../lick-create/lick-create.component';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { LickService } from '../../services/lick.service';
+import { UiService } from '../../services/ui.service';
 import { Lick, Genre, MusicalKey, MusicalKeyLabels, Mode } from '../../models/lick.model';
+import {CircleOfFifthsComponent} from '../circle-of-fifths/circle-of-fifths.component';
 
 @Component({
   selector: 'app-lick-list',
@@ -40,12 +42,13 @@ import { Lick, Genre, MusicalKey, MusicalKeyLabels, Mode } from '../../models/li
     InputNumberModule,
     ToastModule,
     ConfirmDialogModule,
-    AccordionModule,
     TagModule,
     IconFieldModule,
     InputIconModule,
     ProgressSpinnerModule,
-    CircleOfFifthsComponent
+    CircleOfFifthsComponent,
+    DialogModule,
+    LickCreateComponent
   ],
   templateUrl: './lick-list.component.html',
   styleUrl: './lick-list.component.css',
@@ -68,6 +71,7 @@ export class LickListComponent implements OnInit {
   rows: number = 12;
   currentPage: number = 0;
   hasMore: boolean = true;
+  showCreateDialog: boolean = false;
 
   filters: {
     name: string;
@@ -108,13 +112,19 @@ export class LickListComponent implements OnInit {
     return mode.charAt(0) + mode.slice(1).toLowerCase().replace('_', ' ');
   }
 
+  private uiService = inject(UiService);
+
   constructor(
     private lickService: LickService,
     private router: Router,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private cd: ChangeDetectorRef
-  ) {}
+  ) {
+    effect(() => {
+      this.showCreateDialog = this.uiService.showCreateLickModal();
+    });
+  }
 
   ngOnInit(): void {
     this.loadLicks();
@@ -224,5 +234,13 @@ export class LickListComponent implements OnInit {
 
   getKeyLabel(key: MusicalKey): string {
     return MusicalKeyLabels[key] || key;
+  }
+  onLickCreated(lick: Lick) {
+    this.uiService.closeCreateLickModal();
+    this.router.navigate(['/licks', lick.id]);
+  }
+
+  onCancelCreate() {
+    this.uiService.closeCreateLickModal();
   }
 }

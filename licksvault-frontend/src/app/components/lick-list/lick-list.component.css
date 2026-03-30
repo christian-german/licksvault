@@ -1,7 +1,7 @@
 .sticky-sidebar {
     position: sticky;
     top: 1rem;
-    height: calc(100vh - 2rem);
+    max-height: calc(100vh - 2rem);
     overflow-y: auto;
 }
 
@@ -29,4 +29,14 @@
 
 .sticky-sidebar:hover::-webkit-scrollbar-thumb {
     background: var(--text-color-secondary);
+}
+
+.filter-section {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.filter-section:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
 }

@@ -1,8 +1,7 @@
-.field label {
-  display: block;
-  margin-bottom: 0.5rem;
+.field {
+    margin-bottom: 0.5rem !important;
 }
 
-.field {
-  margin-bottom: 1rem;
+.field label {
+    margin-bottom: 0.25rem !important;
 }

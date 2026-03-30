@@ -1,35 +1,59 @@
-<div class="circle-container flex justify-content-center">
-  <svg viewBox="0 0 200 200" class="circle-svg">
-    <!-- Background circle -->
-    <circle cx="100" cy="100" r="95" class="circle-bg" />
+<div class="key-selector-container">
+  <p-button
+    [label]="selectedKeyLabel()"
+    icon="pi pi-music"
+    (onClick)="op.toggle($event)"
+    [outlined]="!selectedKey()"
+    severity="secondary"
+    size="small"
+    class="key-trigger"
+  />
 
-    <!-- Slices -->
-    @for (slice of keys; track slice.key) {
-      <path
-        [attr.d]="'M 100 100 L 100 10 A 90 90 0 0 1 145 24.1 Z'"
-        [class.selected]="selectedKey() === slice.key"
-        class="slice"
-        (click)="selectKey(slice.key)"
-        [attr.transform]="getTransform(slice.angle - 15)"
-      />
-    }
+  <p-popover #op>
+    <div class="circle-popover-content">
+      <svg viewBox="0 0 240 240" class="circle-svg">
+        <defs>
+          <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+        <stop offset="0%" style="stop-color:white; stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#f8f9fa; stop-opacity:1" />
+          </radialGradient>
+        </defs>
 
-    <!-- Labels -->
-    @for (slice of keys; track slice.key) {
-      <text
-        [attr.x]="0"
-        [attr.y]="0"
-        [attr.transform]="getTextTransform(slice.angle)"
-        class="slice-label"
-        dominant-baseline="middle"
-        text-anchor="middle"
-        (click)="selectKey(slice.key)"
-      >
-        {{slice.label}}
-      </text>
-    }
+      <circle cx="120" cy="120" r="118" fill="url(#circleGradient)" stroke="#dee2e6" stroke-width="1" />
 
-    <!-- Center hole for donut look (optional, but looks better) -->
-    <circle cx="100" cy="100" r="35" class="circle-center" />
-  </svg>
+        <!-- Major ring (Outer) -->
+        @for (item of circleKeys; track item.majorEnum) {
+          <g class="segment-group" (click)="selectKey(item.majorEnum, op)">
+            <path
+              [attr.d]="getSlicePath(60, 110, item.angle - 15, item.angle + 15)"
+              class="slice major-slice"
+              [class.selected]="selectedKey() === item.majorEnum"
+            />
+            <text
+              [attr.x]="getLabelPosition(85, item.angle).x"
+              [attr.y]="getLabelPosition(85, item.angle).y"
+              class="slice-label major-label"
+              dominant-baseline="middle"
+              text-anchor="middle"
+            >
+              {{item.major}}
+            </text>
+          </g>
+        }
+
+      <g class="center-button" (click)="clearSelection(op)">
+        <circle cx="120" cy="120" r="55" class="center-circle" />
+        @if (selectedKey()) {
+          <text x="120" y="120" class="clear-icon" dominant-baseline="middle" text-anchor="middle">
+            ✕
+          </text>
+        } @else {
+          <text x="120" y="120" class="center-label placeholder" dominant-baseline="middle" text-anchor="middle">
+            {{selectedKeyLabel()}}
+          </text>
+        }
+      </g>
+      </svg>
+    </div>
+  </p-popover>
 </div>

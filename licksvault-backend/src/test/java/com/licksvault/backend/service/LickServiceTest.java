@@ -38,6 +38,9 @@ class LickServiceTest {
     @Mock
     private SseService sseService;
 
+    @Mock
+    private GuitarProParser guitarProParser;
+
     @InjectMocks
     private LickService lickService;
 
@@ -141,9 +144,15 @@ class LickServiceTest {
     }
 
     @Test
-    void uploadGpFile_WhenFound_ShouldReturnUpdatedDto() {
+    void uploadGpFile_WhenFound_ShouldUpdateMetadataAndReturnUpdatedDto() {
         byte[] gpFileContent = "test content".getBytes();
+        GuitarProParser.GpMetadata metadata = GuitarProParser.GpMetadata.builder()
+                .bpm(145)
+                .lengthBars(12)
+                .build();
+
         when(lickRepository.findById(1L)).thenReturn(Optional.of(lick));
+        when(guitarProParser.parseMetadata(gpFileContent)).thenReturn(metadata);
         when(lickRepository.save(lick)).thenReturn(lick);
         when(lickMapper.toDto(lick)).thenReturn(lickDto);
 
@@ -151,6 +160,8 @@ class LickServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(lick.getGpFile()).isEqualTo(gpFileContent);
+        assertThat(lick.getBpm()).isEqualTo(145);
+        assertThat(lick.getLengthBars()).isEqualTo(12);
         verify(lickRepository).save(lick);
         verify(sseService).broadcast(any(LickEvent.class));
     }

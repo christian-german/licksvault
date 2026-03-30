@@ -38,15 +38,8 @@
           </div>
           <div class="grid align-items-center">
             <div class="col-4 font-bold py-1">Tonic:</div>
-            <div class="col-8 py-1 flex gap-1">
-              <p-inplace #keyInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(keyInplace)">
-                <ng-template pTemplate="display">
-                  <span class="cursor-pointer hover:text-primary">{{getKeyLabel(lick.rootNote)}}</span>
-                </ng-template>
-                <ng-template pTemplate="content">
-                  <p-select [options]="keyOptions" [(ngModel)]="lick.rootNote" placeholder="Select a Tonic" (onChange)="keyInplace.deactivate()" (onBlur)="keyInplace.deactivate()" (onHide)="keyInplace.deactivate()"></p-select>
-                </ng-template>
-              </p-inplace>
+            <div class="col-8 py-1 flex gap-1 align-items-center">
+              <app-circle-of-fifths [selectedKey]="lick.rootNote" (keyChange)="lick.rootNote = $event || lick.rootNote; saveLick()"></app-circle-of-fifths>
               <p-inplace #modeInplace (onDeactivate)="saveLick()" (onActivate)="focusInplace(modeInplace)">
                 <ng-template pTemplate="display">
                   <span class="cursor-pointer hover:text-primary">{{getModeLabel(lick.mode)}}</span>

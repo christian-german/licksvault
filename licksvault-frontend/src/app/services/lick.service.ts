@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Lick, PageResponse } from '../models/lick.model';
-import { environment } from '../../environments/environment';
 
 import { ConfigService } from './config.service';
 

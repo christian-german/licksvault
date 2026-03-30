@@ -2,11 +2,6 @@
 @import "primeflex/primeflex.css";
 @import "primeicons/primeicons.css";
 
-html.my-app-dark body {
-    background-color: #121212;
-    color: #E5E7EB;
-}
-
 body {
     margin: 0;
     font-family: 'Inter', var(--font-family);
@@ -27,4 +22,31 @@ h1, h2, h3, h4, h5, h6 {
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+.fab-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    display: block;
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+.fab-button .p-button {
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    min-width: 3.5rem;
+    min-height: 3.5rem;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.fab-button .p-button .p-button-icon {
+    font-size: 1.5rem;
 }

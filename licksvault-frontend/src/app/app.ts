@@ -1,8 +1,10 @@
-import { Component, Inject, PLATFORM_ID, signal } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
+import { UiService } from './services/ui.service';
+import { OidcSecurityService } from 'angular-auth-oidc-client';
 
 @Component({
   selector: 'app-root',
@@ -13,36 +15,22 @@ import { TooltipModule } from 'primeng/tooltip';
 })
 export class App {
   title = signal('licks-frontend');
-  isDarkMode = true;
+  private uiService = inject(UiService);
+  private oidcSecurityService = inject(OidcSecurityService);
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    if (isPlatformBrowser(this.platformId)) {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        this.isDarkMode = savedTheme === 'dark';
-      }
-      this.applyTheme();
-    }
+  isAuthenticated = signal(false);
+
+  constructor() {
+    this.oidcSecurityService.isAuthenticated$.subscribe(({ isAuthenticated }) => {
+      this.isAuthenticated.set(isAuthenticated);
+    });
   }
 
-  toggleTheme() {
-    this.isDarkMode = !this.isDarkMode;
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-    }
-    this.applyTheme();
+  openNewLickDialog() {
+    this.uiService.openCreateLickModal();
   }
 
-  private applyTheme() {
-    if (isPlatformBrowser(this.platformId)) {
-      const element = document.querySelector('html');
-      if (element) {
-        if (this.isDarkMode) {
-          element.classList.add('my-app-dark');
-        } else {
-          element.classList.remove('my-app-dark');
-        }
-      }
-    }
+  logout() {
+    this.oidcSecurityService.logoff().subscribe();
   }
 }

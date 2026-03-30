@@ -1,50 +1,99 @@
-.circle-container {
-  width: 100%;
-  max-width: 200px;
-  margin: 0 auto;
+.key-selector-container {
+  display: inline-block;
+}
+
+.circle-popover-content {
+  width: 260px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
 }
 
 .circle-svg {
-  width: 100%;
-  height: auto;
+  width: 240px;
+  height: 240px;
   cursor: pointer;
-}
-
-.circle-bg {
-  fill: #1E1E1E; /* surface-800 */
-  stroke: #393939; /* surface-700 */
-  stroke-width: 1;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .slice {
-  fill: #1E1E1E; /* surface-800 to ensure it's not transparent/black */
-  stroke: #393939;
+  fill: white;
+  stroke: #dee2e6;
   stroke-width: 0.5;
-  transition: fill 0.2s, opacity 0.2s;
+  transition: all 0.2s ease;
   pointer-events: all;
 }
 
-.slice:hover {
-  fill: #F59E0B; /* primary-500/amber-500 */
-  opacity: 0.2;
+.segment-group:hover .slice {
+  fill: var(--primary-500);
+  opacity: 0.1;
 }
 
 .slice.selected {
-  fill: #F59E0B;
-  opacity: 1;
+  fill: var(--primary-500) !important;
+  opacity: 1 !important;
+  stroke: var(--primary-500);
+  stroke-width: 1;
 }
 
 .slice-label {
-  fill: #E5E7EB; /* Text color */
-  font-size: 16px;
-  font-weight: bold;
-  pointer-events: all;
-  cursor: pointer;
+  fill: #212529;
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none;
   user-select: none;
+  transition: all 0.2s ease;
 }
 
-.circle-center {
-  fill: #1E1E1E;
-  stroke: #393939;
+.major-label {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.segment-group:hover .slice-label {
+  fill: var(--primary-900);
+  font-weight: 700;
+}
+
+.slice.selected + .slice-label {
+  fill: white !important;
+}
+
+.center-label {
+  fill: var(--p-primary-500, #f59e0b);
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
+  pointer-events: none;
+}
+
+.center-label.placeholder {
+  fill: #adb5bd;
+}
+
+.center-circle {
+  fill: white;
+  stroke: #dee2e6;
   stroke-width: 1;
+  transition: all 0.2s ease;
+}
+
+.center-button {
+  cursor: pointer;
+}
+
+.center-button:hover .center-circle {
+  fill: #fffbeb;
+  stroke: var(--p-primary-500, #f59e0b);
+  stroke-width: 2;
+}
+
+.clear-icon {
+  fill: #ef4444;
+  font-size: 24px;
+  font-weight: bold;
+  pointer-events: none;
 }

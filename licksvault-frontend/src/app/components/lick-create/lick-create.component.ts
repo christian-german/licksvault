@@ -1,17 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { SelectModule } from 'primeng/select';
+import { SliderModule } from 'primeng/slider';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { LickService } from '../../services/lick.service';
 import { Genre, Lick, Mode, MusicalKey, MusicalKeyLabels } from '../../models/lick.model';
+import { CircleOfFifthsComponent } from '../circle-of-fifths/circle-of-fifths.component';
 
 @Component({
   selector: 'app-lick-create',
@@ -24,15 +25,19 @@ import { Genre, Lick, Mode, MusicalKey, MusicalKeyLabels } from '../../models/li
     CardModule,
     InputTextModule,
     InputNumberModule,
-    SelectModule,
+    SliderModule,
     TextareaModule,
-    ToastModule
+    ToastModule,
+    CircleOfFifthsComponent
   ],
   templateUrl: './lick-create.component.html',
   styleUrl: './lick-create.component.css',
   providers: [MessageService]
 })
 export class LickCreateComponent implements OnInit {
+  @Output() saved = new EventEmitter<Lick>();
+  @Output() cancelled = new EventEmitter<void>();
+
   lick: Lick = {
     name: '',
     bpm: 120,
@@ -44,12 +49,10 @@ export class LickCreateComponent implements OnInit {
   };
 
   genreOptions = Object.values(Genre).map(g => ({ label: g.charAt(0) + g.slice(1).toLowerCase(), value: g }));
-  keyOptions = Object.entries(MusicalKeyLabels).map(([value, label]) => ({ label, value }));
   modeOptions = Object.values(Mode).map(m => ({ label: m.charAt(0) + m.slice(1).toLowerCase().replace('_', ' '), value: m }));
 
   constructor(
     private lickService: LickService,
-    private router: Router,
     private messageService: MessageService
   ) {}
 
@@ -64,9 +67,7 @@ export class LickCreateComponent implements OnInit {
     this.lickService.createLick(this.lick).subscribe({
       next: (createdLick) => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Lick created successfully' });
-        setTimeout(() => {
-          this.router.navigate(['/licks', createdLick.id]);
-        }, 1000);
+        this.saved.emit(createdLick);
       },
       error: (err) => {
         console.error('Error creating lick:', err);
@@ -76,6 +77,6 @@ export class LickCreateComponent implements OnInit {
   }
 
   cancel(): void {
-    this.router.navigate(['/']);
+    this.cancelled.emit();
   }
 }

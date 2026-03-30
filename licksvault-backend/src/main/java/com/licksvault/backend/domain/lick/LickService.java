@@ -1,6 +1,7 @@
 package com.licksvault.backend.domain.lick;
 
 import com.licksvault.backend.exception.ResourceNotFoundException;
+import com.licksvault.backend.service.GuitarProParser;
 import com.licksvault.backend.service.SseService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class LickService {
     private final LickRepository lickRepository;
     private final LickMapper lickMapper;
     private final SseService sseService;
+    private final GuitarProParser guitarProParser;
 
     @Transactional(readOnly = true)
     public Page<LickDto> getAllLicks(String name, Integer bpmMin, Integer bpmMax, MusicalKey key, Mode mode,
@@ -108,6 +110,17 @@ public class LickService {
         Lick existingLick = lickRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Lick not found with id: " + id));
         existingLick.setGpFile(gpFile);
+
+        GuitarProParser.GpMetadata metadata = guitarProParser.parseMetadata(gpFile);
+        if (metadata != null) {
+            if (metadata.getBpm() != null && metadata.getBpm() > 0) {
+                existingLick.setBpm(metadata.getBpm());
+            }
+            if (metadata.getLengthBars() != null && metadata.getLengthBars() > 0) {
+                existingLick.setLengthBars(metadata.getLengthBars());
+            }
+        }
+
         Lick updatedLick = lickRepository.save(existingLick);
 
         LickDto updatedLickDto = lickMapper.toDto(updatedLick);

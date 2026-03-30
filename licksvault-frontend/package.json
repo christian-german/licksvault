@@ -34,6 +34,7 @@
     "@coderline/alphatab": "^1.8.1",
     "@primeng/themes": "^21.0.4",
     "@primeuix/themes": "^2.0.3",
+    "angular-auth-oidc-client": "^21.0.1",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
     "primeng": "^21.1.1",

@@ -1,13 +1,39 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { definePreset } from '@primeuix/themes';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfigService } from './services/config.service';
+import { authInterceptor, provideAuth, StsConfigLoader } from 'angular-auth-oidc-client';
+import { map } from 'rxjs';
+
+export class DynamicConfigLoader implements StsConfigLoader {
+  constructor(private configService: ConfigService) {}
+
+  loadConfigs() {
+    return this.configService.configObservable.pipe(
+      map((config) => {
+        const authority = config.oidc.authority;
+
+        return [{
+          authority: authority,
+          redirectUrl: config.oidc.redirectUri,
+          postLogoutRedirectUri: config.oidc.postLogoutRedirectUri,
+          clientId: config.oidc.clientId,
+          scope: config.oidc.scope,
+          responseType: 'code',
+          silentRenew: true,
+          useRefreshToken: true,
+          secureRoutes: [config.apiUrl],
+        }];
+      })
+    );
+  }
+}
 
 const MyPreset = definePreset(Aura, {
     semantic: {
@@ -23,36 +49,6 @@ const MyPreset = definePreset(Aura, {
             800: '{amber.800}',
             900: '{amber.900}',
             950: '{amber.950}'
-        },
-        colorScheme: {
-            dark: {
-                surface: {
-                    0: '#ffffff',
-                    50: '#f4f4f4',
-                    100: '#e8e8e8',
-                    200: '#c6c6c6',
-                    300: '#a8a8a8',
-                    400: '#8d8d8d',
-                    500: '#6f6f6f',
-                    600: '#525252',
-                    700: '#393939',
-                    800: '#1E1E1E',
-                    900: '#121212',
-                    950: '#000000'
-                },
-                content: {
-                    background: '{surface.800}',
-                    color: '#E5E7EB'
-                },
-                formField: {
-                    background: '{surface.800}',
-                    color: '#E5E7EB'
-                },
-                accent: {
-                    primary: '#F59E0B',
-                    secondary: '#3B82F6'
-                }
-            }
         }
     }
 });
@@ -61,13 +57,20 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor()])),
+    provideAuth({
+      loader: {
+        provide: StsConfigLoader,
+        useFactory: (configService: ConfigService) => new DynamicConfigLoader(configService),
+        deps: [ConfigService],
+      },
+    }),
     provideAnimations(),
     providePrimeNG({
         theme: {
             preset: MyPreset,
             options: {
-                darkModeSelector: '.my-app-dark'
+                darkModeSelector: false
             }
         }
     }),

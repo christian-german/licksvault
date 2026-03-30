@@ -4,13 +4,14 @@
       <i class="pi pi-music text-2xl"></i>
       <span class="text-xl font-bold">Guitar Lick Library</span>
     </div>
-    <div class="flex align-items-center gap-2">
-      <p-button icon="pi pi-plus" [rounded]="true" [text]="true" pTooltip="New Lick" routerLink="/licks/new" severity="secondary"></p-button>
-      <p-button [icon]="isDarkMode ? 'pi pi-sun' : 'pi pi-moon'" (onClick)="toggleTheme()" [rounded]="true" [text]="true" severity="secondary"></p-button>
+    <div class="flex align-items-center gap-2" *ngIf="isAuthenticated()">
+      <p-button icon="pi pi-sign-out" [rounded]="true" text="true" (onClick)="logout()" severity="secondary" pTooltip="Logout"></p-button>
     </div>
   </div>
 
   <div class="layout-content p-2">
     <router-outlet></router-outlet>
   </div>
+
+  <p-button icon="pi pi-plus" [rounded]="true" pTooltip="New Lick" (onClick)="openNewLickDialog()" severity="primary" class="fab-button" *ngIf="isAuthenticated()"></p-button>
 </div>

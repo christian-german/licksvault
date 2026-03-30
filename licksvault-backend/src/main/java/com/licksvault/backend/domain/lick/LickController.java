@@ -2,6 +2,7 @@ package com.licksvault.backend.domain.lick;
 
 import com.licksvault.backend.service.SseService;
 import com.licksvault.backend.service.VideoService;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/licks")
@@ -59,7 +61,7 @@ public class LickController {
                               @RequestPart(value = "gpFile", required = false) MultipartFile gpFile) throws IOException {
 
         LickDto lickDto = jsonMapper.readValue(lickJson, LickDto.class);
-        var violations = validator.validate(lickDto);
+        Set<ConstraintViolation<LickDto>> violations = validator.validate(lickDto);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
@@ -76,7 +78,7 @@ public class LickController {
                               @RequestPart(value = "gpFile", required = false) MultipartFile gpFile) throws IOException {
 
         LickDto lickDto = jsonMapper.readValue(lickJson, LickDto.class);
-        var violations = validator.validate(lickDto);
+        Set<ConstraintViolation<LickDto>> violations = validator.validate(lickDto);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
