@@ -36,17 +36,16 @@ services:
     image: ghcr.io/goauthentik/server:2026.2.1
     command: server
     environment:
-      AUTHENTIK_REDIS__HOST: redis
       AUTHENTIK_POSTGRESQL__HOST: db-authentik
       AUTHENTIK_POSTGRESQL__NAME: authentik
       AUTHENTIK_POSTGRESQL__USER: authentik
       AUTHENTIK_POSTGRESQL__PASSWORD: authentik
       AUTHENTIK_SECRET_KEY: licksvault-dev-secret-key
-      AUTHENTIK_BOOTSTRAP_PASSWORD: admin
+      AUTHENTIK_BOOTSTRAP_PASSWORD: ChangeMe123!
       AUTHENTIK_BOOTSTRAP_TOKEN: licksvault-token
       AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
     volumes:
-      - authentik-templates:/templates
+      - ./authentik/blueprints/licksvault.yaml:/blueprints/custom/licksvault.yaml
     ports:
       - "8000:9000"
       - "8443:9443"
@@ -64,7 +63,7 @@ services:
       AUTHENTIK_POSTGRESQL__PASSWORD: authentik
       AUTHENTIK_SECRET_KEY: licksvault-dev-secret-key
     volumes:
-      - authentik-templates:/templates
+      - ./authentik/blueprints/licksvault.yaml:/blueprints/custom/licksvault.yaml
     depends_on:
       db-authentik:
         condition: service_healthy
@@ -92,4 +91,3 @@ volumes:
   pgdata:
   miniodata:
   pgdata-authentik:
-  authentik-templates:
