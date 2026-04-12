@@ -1,13 +1,9 @@
 package com.licksvault.backend.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.licksvault.backend.domain.lick.LickController;
-import com.licksvault.backend.domain.lick.LickDto;
-import com.licksvault.backend.domain.lick.Genre;
-import com.licksvault.backend.domain.lick.Mode;
-import com.licksvault.backend.domain.lick.MusicalKey;
-import com.licksvault.backend.domain.lick.LickService;
+import com.c4_soft.springaddons.security.oauth2.test.annotations.WithMockAuthentication;
+import com.licksvault.backend.domain.lick.*;
 import com.licksvault.backend.service.SseService;
+import com.licksvault.backend.service.VideoService;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,15 +20,20 @@ import java.util.Collections;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.testSecurityContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(LickController.class)
+@WebMvcTest()
 class LickControllerTest {
 
     @MockitoBean
     private LickService lickService;
+
+    @MockitoBean
+    private VideoService videoService;
 
     @MockitoBean
     private SseService sseService;
@@ -40,18 +41,13 @@ class LickControllerTest {
     @MockitoBean
     private Validator validator;
 
-    @MockitoBean
-    private ObjectMapper objectMapper;
-
     @Autowired
     private MockMvc mockMvc;
 
     private LickDto lickDto;
 
     @BeforeEach
-    void setUp() throws com.fasterxml.jackson.core.JsonProcessingException {
-        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
-        when(objectMapper.readValue(anyString(), eq(LickDto.class))).thenReturn(LickDto.builder().name("Test Lick").build());
+    void setUp() {
         when(validator.forExecutables()).thenReturn(mock(jakarta.validation.executable.ExecutableValidator.class));
         when(validator.validate(any())).thenReturn(Collections.emptySet());
 
@@ -67,6 +63,7 @@ class LickControllerTest {
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void getAllLicks_ShouldReturnOk() throws Exception {
 
         Page<LickDto> response = new PageImpl<>(Collections.singletonList(lickDto));
@@ -74,47 +71,60 @@ class LickControllerTest {
         when(lickService.getAllLicks(any(), any(), any(), any(), any(), any(), any(), any(), anyInt(), anyInt(), anyString(), anyString()))
                 .thenReturn(response);
 
-        mockMvc.perform(get("/api/licks"))
+        mockMvc.perform(get("/licks").with(testSecurityContext()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].name").value("Test Lick"));
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void getLickById_ShouldReturnOk() throws Exception {
         when(lickService.getLickById(1L)).thenReturn(lickDto);
 
-        mockMvc.perform(get("/api/licks/1"))
+        mockMvc.perform(get("/licks/1").with(testSecurityContext()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test Lick"));
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void createLick_ShouldReturnCreated() throws Exception {
         when(lickService.createLick(any(LickDto.class))).thenReturn(lickDto);
 
-        mockMvc.perform(multipart("/api/licks")
-                .file(new org.springframework.mock.web.MockMultipartFile("lick", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsString(lickDto).getBytes())))
+        mockMvc.perform(multipart("/licks")
+                .with(csrf())
+                .with(testSecurityContext())
+                .file(new org.springframework.mock.web.MockMultipartFile("lick", "", MediaType.APPLICATION_JSON_VALUE, """
+                        {"name":"Test Lick","bpm":120,"rootNote":"C","mode":"IONIAN","lengthBars":4,"genre":"ROCK"}
+                        """.getBytes())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Test Lick"));
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void updateLick_ShouldReturnOk() throws Exception {
         when(lickService.updateLick(eq(1L), any(LickDto.class))).thenReturn(lickDto);
 
-        mockMvc.perform(multipart(org.springframework.http.HttpMethod.PUT, "/api/licks/1")
-                .file(new org.springframework.mock.web.MockMultipartFile("lick", "", MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsString(lickDto).getBytes())))
+        mockMvc.perform(multipart(org.springframework.http.HttpMethod.PUT, "/licks/1")
+                .with(csrf())
+                .with(testSecurityContext())
+                .file(new org.springframework.mock.web.MockMultipartFile("lick", "", MediaType.APPLICATION_JSON_VALUE, """
+                        {"name":"Test Lick","bpm":120,"rootNote":"C","mode":"IONIAN","lengthBars":4,"genre":"ROCK"}
+                        """.getBytes())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test Lick"));
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void deleteLick_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/api/licks/1"))
+        mockMvc.perform(delete("/licks/1").with(csrf()).with(testSecurityContext()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void createLick_WithInvalidData_ShouldReturnBadRequest() throws Exception {
         LickDto invalidDto = new LickDto(); // Missing required fields
         jakarta.validation.ConstraintViolation<LickDto> violation = mock(jakarta.validation.ConstraintViolation.class);
@@ -124,34 +134,41 @@ class LickControllerTest {
         when(violation.getMessage()).thenReturn("must not be null");
         when(validator.validate(any())).thenReturn(new java.util.HashSet(Collections.singleton(violation)));
 
-        mockMvc.perform(multipart("/api/licks")
+        mockMvc.perform(multipart("/licks")
+                .with(csrf())
+                .with(testSecurityContext())
                 .file(new org.springframework.mock.web.MockMultipartFile("lick", "", MediaType.APPLICATION_JSON_VALUE, "{}".getBytes())))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Validation failed"));
+                .andExpect(jsonPath("$.detail").value("Validation failed"));
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void handleEvents_ShouldReturnEmitter() throws Exception {
         when(sseService.createEmitter()).thenReturn(new org.springframework.web.servlet.mvc.method.annotation.SseEmitter());
 
-        mockMvc.perform(get("/api/licks/events"))
+        mockMvc.perform(get("/licks/events").with(testSecurityContext()))
                 .andExpect(status().isOk());
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void handleEvents_WithError_ShouldReturnJsonError() throws Exception {
         when(sseService.createEmitter()).thenThrow(new RuntimeException("Something went wrong"));
 
-        mockMvc.perform(get("/api/licks/events").accept(MediaType.TEXT_EVENT_STREAM))
+        mockMvc.perform(get("/licks/events").with(testSecurityContext()).accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.message").value("An unexpected error occurred: Something went wrong"));
+                .andExpect(jsonPath("$.detail").value("An unexpected error occurred: Something went wrong"));
     }
 
     @Test
+    @WithMockAuthentication({ "user" })
     void uploadGpFile_ShouldReturnOk() throws Exception {
         when(lickService.uploadGpFile(eq(1L), any(byte[].class))).thenReturn(lickDto);
 
-        mockMvc.perform(multipart(org.springframework.http.HttpMethod.PATCH, "/api/licks/1/gp-file")
+        mockMvc.perform(multipart(org.springframework.http.HttpMethod.PATCH, "/licks/1/gp-file")
+                .with(csrf())
+                .with(testSecurityContext())
                 .file(new org.springframework.mock.web.MockMultipartFile("gpFile", "test.gp", MediaType.APPLICATION_OCTET_STREAM_VALUE, "test content".getBytes())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Test Lick"));
